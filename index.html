@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Test avec canvas</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        canvas {
+            border: 5px solid #000;
+        }
+    </style>
+    <script src="./scripts/Engine.class.js"></script>
+    <script src="./scripts/Element.class.js"></script>
+    <script>
+        window.onload = function () {
+            Engine.addClass(
+				{
+				    'name': 'Planete',
+				    'eventCreate': function () {
+				        this.Velocity = null;
+				        this.Mass = 0;
+				        this._IsGravityPoint = false;
+				        this.Mass = 6E24;
+				        this.Velocity = new Engine.Vec2(0, 0);
+				    },
+				    'IsAffectedByGravity': function () {
+				        return true;
+				    },
+				    'Color': 'Blue',
+				    'Size': 2,
+				    'Draw': function () {
+				        Engine.ctx.beginPath();
+				        Engine.ctx.lineWidth = 2;
+				        Engine.ctx.fillStyle = this.Color;
+				        Engine.ctx.arc(this.CenterPosition.x, this.CenterPosition.y, this.Size, 0, Math.PI * 2, true);
+				        Engine.ctx.closePath();
+				        Engine.ctx.fill();
+				        Engine.ctx.stroke();
+						Engine.ctx.fillStyle='red';
+						Engine.ctx.beginPath();
+						//Engine.ctx.fillRect(this.Position.x,this.Position.y,1,1);
+				    },
+				    'IsGravityPoint': function (_isGravityPoint) {
+				        if (_isGravityPoint != undefined) {
+				            this._IsGravityPoint = _isGravityPoint;
+
+				            if (_isGravityPoint) {
+				                Engine.PhysicWolrd.GravityPoints.push(this);
+				            }
+				            else {
+				                Engine.PhysicWolrd.GravityPoints.remove(this);
+				            }
+				            return this;
+				        }
+				        return this._IsGravityPoint;
+				    },
+					'PositionChanged':function()
+					{
+						this.OldPosition.copy(this.Position);
+						
+						this.OldCenterPosition.copy(this.GetCenterByPos(this.OldPosition));
+						this.RefreshCenterPos();
+					},
+					'RefreshCenterPos':function()
+					{
+						 this.CenterPosition.copy(this.Position).addScalar(this.Size);
+					},
+					'GetCenterByPos':function(pos)
+					{
+						return pos.clone().addScalar(this.Size);
+					}
+					
+					
+				});
+            Engine.init('monCanvas');
+            Engine.run();
+//            var obj = Engine.instanceCreate(30, 40, Planete);
+ //           obj.Velocity.set(0, 0);
+            //obj.IsGravityPoint=true;
+            //mercure
+  //          obj = Engine.instanceCreate(500, 380 - (46E9 / Engine.MpP), Planete);
+   //         obj.Velocity.set(59000 / Engine.MpP, 0);
+            //obj.Mass=3.302E23;
+            //obj.Size=(2.44E10/Engine.MpP);
+            //obj.IsGravityPoint=true;
+            //soleil
+  //          obj = Engine.instanceCreate(400, 300, Planete);
+    //        obj.Velocity.set(0, 0);
+     //       obj.Mass = 2E30;
+       //     obj.Size=(6*6.96E9/Engine.MpP);
+         //   obj.Color = "yellow";
+           // obj.IsGravityPoint(true); 
+
+           
+            //obj.IsGravityPoint=true;
+			for(var cptp=0;cptp<100;cptp++)
+			{
+			obj = Engine.instanceCreate(200+cptp*2, 100+cptp*4, Planete);
+			Engine.PhysicWolrd.Linked.push(obj);	
+			}
+			
+			 obj = Engine.instanceCreate(100, 100, Planete);
+            obj.Velocity.set(0, 0);
+			obj.Size=50;
+			obj.Mass = 2E30;
+            obj.Color = "green";
+			//obj.IsGravityPoint(true)
+            var total = 0;
+            window.document.onkeydown = function (e) {
+                if (!e) e = window.event;
+                var code = (e.which) ? e.which : e.keyCode;
+                var p = 0.001;
+                switch (code) {
+                    case 13: Engine.instanceCreate(obj.Position.x + 30, obj.Position.y + 30, Planete); document.getElementById('elements').innerHTML = 'Elements créés manuellement : ' + (++total); break;
+                    case 37: obj.ApplyForce(new Engine.Vec2(-0.5 * obj.Mass * p, 0)); break;
+                    case 38: obj.ApplyForce(new Engine.Vec2(0, -0.5 * obj.Mass * p)); break;
+                    case 39: obj.ApplyForce(new Engine.Vec2(0.5 * obj.Mass * p, 0)); break;
+                    case 40: obj.ApplyForce(new Engine.Vec2(0, 0.5 * obj.Mass * p)); break;
+                    case 43: obj.Mass *= 2; break;
+                    case 45: obj.Mass /= 2; break;
+                }
+            };
+
+            //Engine.instanceCreate(300,200,Carre);//.IsGravityPoint=true;
+
+            //Dessinez dans votre canvas ici !
+        };
+    </script>
+</head>
+<body>
+    <canvas id="monCanvas">La balise &lt;canvas&gt; ne semble pas être gérée... </canvas>
+    <div id="Controls">
+        <button onclick="Engine.ToogleRender(this);">Disable Render</button>
+		<input id="min" type ="range" min ="0" max="300" step ="1" value ="125"/>
+		<input id="max" type ="range" min ="0" max="400" step ="1" value ="195"/>
+    </div>
+    <div id="fps"></div>
+    <div id="elements"></div>
+</body>
+</html>
